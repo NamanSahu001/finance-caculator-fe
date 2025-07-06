@@ -7,6 +7,7 @@ import {
 } from '../services/api'
 
 type User = {
+  id: number
   name: string
   email: string
   type: number // 1 for "simple" user, 2 for "admin"

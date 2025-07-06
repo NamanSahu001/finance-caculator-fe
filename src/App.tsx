@@ -8,12 +8,6 @@ import AdminPage from './pages/AdminPage'
 import { AuthProvider, useAuth } from './context/AuthContext'
 import { PlanProvider } from './context/PlanContext'
 
-function RequireAuth({ children }: { children: React.ReactElement }) {
-  const { user } = useAuth()
-  if (!user) return <Navigate to='/login' />
-  return children
-}
-
 function RequireAdmin({ children }: { children: React.ReactElement }) {
   const { user, isAdmin } = useAuth()
   if (!user || !isAdmin()) return <Navigate to='/login' />
