@@ -1,6 +1,6 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { usePlan } from '../context/PlanContext'
-import { getPlanSummary } from '../services/api'
+import { getPlanSummary, getPlanData } from '../services/api'
 import Chart from '../components/Chart'
 
 const tabs = [
@@ -8,38 +8,39 @@ const tabs = [
   'Income',
   'Expenses',
   'Investment Strategy',
-  'Goals',
   'Summary',
 ]
 
 // Predefined fields based on financial planning structure
 const fieldDefinitions = {
   'Personal Info': {
-    Age: { type: 'number', placeholder: 'Enter your age' },
+    'Current Age': { type: 'number', placeholder: 'Enter your current age' },
     'Retirement Age': { type: 'number', placeholder: 'Target retirement age' },
-    'Life Expectancy': {
+    'Wish to live till': {
       type: 'number',
       placeholder: 'Expected life expectancy',
+      defaultValue: 85,
     },
     'Current Savings': { type: 'number', placeholder: 'Current total savings' },
-    'Monthly Income': {
-      type: 'number',
-      placeholder: 'Monthly take-home income',
-    },
-    'Inflation Rate': {
+    Inflation: {
       type: 'number',
       placeholder: 'Expected inflation rate %',
       defaultValue: 6,
     },
-    'Step-up in Savings': {
+    'Capital Gain Tax': {
       type: 'number',
-      placeholder: 'Annual increase in savings %',
-      defaultValue: 5,
+      placeholder: 'Capital gains tax rate %',
+      defaultValue: 20,
+    },
+    'Income Tax': {
+      type: 'number',
+      placeholder: 'Income tax rate %',
+      defaultValue: 30,
     },
   },
   Income: {
-    Salary: { type: 'number', placeholder: 'Annual salary' },
-    Bonus: { type: 'number', placeholder: 'Annual bonus' },
+    Salary: { type: 'number', placeholder: 'Monthly salary' },
+    Bonus: { type: 'number', placeholder: 'Monthly bonus' },
     'Investment Income': {
       type: 'number',
       placeholder: 'Monthly investment income',
@@ -61,59 +62,84 @@ const fieldDefinitions = {
     'Debt Payments': { type: 'number', placeholder: 'Monthly debt payments' },
   },
   'Investment Strategy': {
-    'Current Monthly Investment': {
+    // Safe Asset Investments
+    'VPF/EPF/PPF Amount': {
       type: 'number',
-      placeholder: 'Current monthly investment amount',
-    },
-    'Fixed Returns Allocation': {
-      type: 'number',
-      placeholder: 'Fixed returns allocation %',
+      placeholder: 'VPF/EPF/PPF amount',
       defaultValue: 0,
     },
-    'Large Cap Mutual Funds Allocation': {
+    'VPF/EPF/PPF IRR': {
       type: 'number',
-      placeholder: 'Large cap allocation %',
-      defaultValue: 40,
+      placeholder: 'VPF/EPF/PPF IRR %',
+      defaultValue: 7,
     },
-    'Direct Stocks Allocation': {
+    'Recurring Deposit/Fixed Dep Amount': {
       type: 'number',
-      placeholder: 'Direct stocks allocation %',
-      defaultValue: 35,
+      placeholder: 'Recurring Deposit amount',
+      defaultValue: 0,
     },
-    'Small Cap Mutual Funds Allocation': {
+    'Recurring Deposit/Fixed Dep IRR': {
       type: 'number',
-      placeholder: 'Small cap allocation %',
-      defaultValue: 25,
+      placeholder: 'Recurring Deposit IRR %',
+      defaultValue: 7,
     },
-    'Post Retirement Fixed Returns': {
+    'Government Bills Amount': {
       type: 'number',
-      placeholder: 'Post-retirement fixed returns %',
-      defaultValue: 50,
+      placeholder: 'Government Bills amount',
+      defaultValue: 0,
     },
-    'Post Retirement Large Cap': {
+    'Government Bills IRR': {
       type: 'number',
-      placeholder: 'Post-retirement large cap %',
-      defaultValue: 50,
+      placeholder: 'Government Bills IRR %',
+      defaultValue: 7,
     },
-  },
-  Goals: {
-    'Emergency Fund': {
+    'Gold Amount': {
       type: 'number',
-      placeholder: 'Target emergency fund amount',
+      placeholder: 'Gold amount',
+      defaultValue: 0,
     },
-    'House Down Payment': {
+    'Gold IRR': { type: 'number', placeholder: 'Gold IRR %', defaultValue: 7 },
+    'Corporate Bonds Amount': {
       type: 'number',
-      placeholder: 'Target house down payment',
+      placeholder: 'Corporate Bonds amount',
+      defaultValue: 20,
     },
-    'Children Education': {
+    'Corporate Bonds IRR': {
       type: 'number',
-      placeholder: 'Target education fund',
+      placeholder: 'Corporate Bonds IRR %',
+      defaultValue: 7,
     },
-    'Retirement Goal': {
+    // Stock Market Investments
+    'Largecap Mutual Fund Amount': {
       type: 'number',
-      placeholder: 'Target retirement savings',
+      placeholder: 'Largecap Mutual Fund amount',
+      defaultValue: 0,
     },
-    'Travel Fund': { type: 'number', placeholder: 'Annual travel budget' },
+    'Largecap Mutual Fund IRR': {
+      type: 'number',
+      placeholder: 'Largecap Mutual Fund IRR %',
+      defaultValue: 12,
+    },
+    'Direct Stocks Amount': {
+      type: 'number',
+      placeholder: 'Direct Stocks amount',
+      defaultValue: 220,
+    },
+    'Direct Stocks IRR': {
+      type: 'number',
+      placeholder: 'Direct Stocks IRR %',
+      defaultValue: 10,
+    },
+    'Smallcap Mutual Fund Amount': {
+      type: 'number',
+      placeholder: 'Smallcap Mutual Fund amount',
+      defaultValue: 10,
+    },
+    'Smallcap Mutual Fund IRR': {
+      type: 'number',
+      placeholder: 'Smallcap Mutual Fund IRR %',
+      defaultValue: 18,
+    },
   },
 }
 
@@ -135,6 +161,27 @@ const CalculatorPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState('Personal Info')
   const [result, setResult] = useState<any>(null)
   const [loading, setLoading] = useState(false)
+  const [dataLoading, setDataLoading] = useState(true)
+
+  // Load plan data on component mount
+  useEffect(() => {
+    const loadPlanData = async () => {
+      try {
+        setDataLoading(true)
+        const planData = await getPlanData(1) // Fetch plan with ID 1
+        console.log('Loaded plan data:', planData)
+
+        // Update the plan context with fetched data
+        setPlan(planData)
+      } catch (error) {
+        console.error('Error loading plan data:', error)
+      } finally {
+        setDataLoading(false)
+      }
+    }
+
+    loadPlanData()
+  }, [setPlan])
 
   const handleInput = (section: string, key: string, value: any) => {
     setPlan((prev) => ({
@@ -192,7 +239,6 @@ const CalculatorPage: React.FC = () => {
     const income = plan.income || {}
     const expenses = plan.expenses || {}
     const investmentStrategy = plan.investmentstrategy || {}
-    const goals = plan.goals || {}
 
     const totalIncome = Object.values(income).reduce(
       (sum: number, val: any) => sum + (Number(val) || 0),
@@ -206,47 +252,69 @@ const CalculatorPage: React.FC = () => {
       Number(investmentStrategy['Current Monthly Investment']) || 0
     const netIncome = totalIncome - totalExpenses
 
-    // Calculate investment approach returns
-    const fixedReturnsAlloc =
-      Number(investmentStrategy['Fixed Returns Allocation']) || 0
-    const largeCapAlloc =
-      Number(investmentStrategy['Large Cap Mutual Funds Allocation']) || 0
-    const directStocksAlloc =
-      Number(investmentStrategy['Direct Stocks Allocation']) || 0
-    const smallCapAlloc =
-      Number(investmentStrategy['Small Cap Mutual Funds Allocation']) || 0
+    // Calculate investment approach returns using new field structure
+    const vpfAmount = Number(investmentStrategy['VPF/EPF/PPF Amount']) || 0
+    const vpfIRR = Number(investmentStrategy['VPF/EPF/PPF IRR']) || 7
+    const rdAmount =
+      Number(investmentStrategy['Recurring Deposit/Fixed Dep Amount']) || 0
+    const rdIRR =
+      Number(investmentStrategy['Recurring Deposit/Fixed Dep IRR']) || 7
+    const govBillsAmount =
+      Number(investmentStrategy['Government Bills Amount']) || 0
+    const govBillsIRR = Number(investmentStrategy['Government Bills IRR']) || 7
+    const goldAmount = Number(investmentStrategy['Gold Amount']) || 0
+    const goldIRR = Number(investmentStrategy['Gold IRR']) || 7
+    const corporateBondsAmount =
+      Number(investmentStrategy['Corporate Bonds Amount']) || 20
+    const corporateBondsIRR =
+      Number(investmentStrategy['Corporate Bonds IRR']) || 7
+
+    const largeCapAmount =
+      Number(investmentStrategy['Largecap Mutual Fund Amount']) || 0
+    const largeCapIRR =
+      Number(investmentStrategy['Largecap Mutual Fund IRR']) || 12
+    const directStocksAmount =
+      Number(investmentStrategy['Direct Stocks Amount']) || 220
+    const directStocksIRR =
+      Number(investmentStrategy['Direct Stocks IRR']) || 10
+    const smallCapAmount =
+      Number(investmentStrategy['Smallcap Mutual Fund Amount']) || 10
+    const smallCapIRR =
+      Number(investmentStrategy['Smallcap Mutual Fund IRR']) || 18
+
+    const totalSafeAssets =
+      vpfAmount + rdAmount + govBillsAmount + goldAmount + corporateBondsAmount
+    const totalStockMarket =
+      largeCapAmount + directStocksAmount + smallCapAmount
+    const totalInvestment = totalSafeAssets + totalStockMarket
 
     const currentReturns =
-      (fixedReturnsAlloc * investmentApproaches['Fixed Returns'].returns +
-        largeCapAlloc * investmentApproaches['Large Cap Mutual Funds'].returns +
-        directStocksAlloc * investmentApproaches['Direct Stocks'].returns +
-        smallCapAlloc *
-          investmentApproaches['Small Cap Mutual Funds'].returns) /
-      100
+      totalInvestment > 0
+        ? (vpfAmount * vpfIRR +
+            rdAmount * rdIRR +
+            govBillsAmount * govBillsIRR +
+            goldAmount * goldIRR +
+            corporateBondsAmount * corporateBondsIRR +
+            largeCapAmount * largeCapIRR +
+            directStocksAmount * directStocksIRR +
+            smallCapAmount * smallCapIRR) /
+          totalInvestment
+        : 0
 
     const currentTaxRate =
-      (fixedReturnsAlloc * investmentApproaches['Fixed Returns'].tax +
-        largeCapAlloc * investmentApproaches['Large Cap Mutual Funds'].tax +
-        directStocksAlloc * investmentApproaches['Direct Stocks'].tax +
-        smallCapAlloc * investmentApproaches['Small Cap Mutual Funds'].tax) /
-      100
+      totalInvestment > 0
+        ? (totalSafeAssets * 30 + totalStockMarket * 20) / totalInvestment
+        : 0
 
-    const postRetirementFixed =
-      Number(investmentStrategy['Post Retirement Fixed Returns']) || 0
-    const postRetirementLargeCap =
-      Number(investmentStrategy['Post Retirement Large Cap']) || 0
+    // Post-retirement strategy - using default conservative allocation
+    const postRetirementSafeAssets = 70 // 70% safe assets
+    const postRetirementLargeCap = 30 // 30% large cap
 
     const postRetirementReturns =
-      (postRetirementFixed * postRetirementApproaches['Fixed Returns'].returns +
-        postRetirementLargeCap *
-          postRetirementApproaches['Large Cap Mutual Funds'].returns) /
-      100
+      (postRetirementSafeAssets * 7 + postRetirementLargeCap * 12) / 100
 
     const postRetirementTax =
-      (postRetirementFixed * postRetirementApproaches['Fixed Returns'].tax +
-        postRetirementLargeCap *
-          postRetirementApproaches['Large Cap Mutual Funds'].tax) /
-      100
+      (postRetirementSafeAssets * 30 + postRetirementLargeCap * 20) / 100
 
     return (
       <div className='space-y-6'>
@@ -264,7 +332,7 @@ const CalculatorPage: React.FC = () => {
               <div className='flex justify-between'>
                 <span>Current Savings:</span>
                 <span className='font-medium'>
-                  ${(personalInfo.CurrentSavings || 0).toLocaleString()}
+                  ${(personalInfo['Current Savings'] || 0).toLocaleString()}
                 </span>
               </div>
               <div className='flex justify-between'>
@@ -321,43 +389,28 @@ const CalculatorPage: React.FC = () => {
           <div className='grid grid-cols-2 md:grid-cols-4 gap-4 text-sm'>
             <div className='text-center'>
               <div className='font-medium text-blue-600'>
-                {fixedReturnsAlloc}%
+                ${totalSafeAssets.toLocaleString()}
               </div>
-              <div className='text-gray-600'>Fixed Returns</div>
+              <div className='text-gray-600'>Safe Assets</div>
             </div>
             <div className='text-center'>
-              <div className='font-medium text-green-600'>{largeCapAlloc}%</div>
-              <div className='text-gray-600'>Large Cap</div>
+              <div className='font-medium text-green-600'>
+                ${largeCapAmount.toLocaleString()}
+              </div>
+              <div className='text-gray-600'>Largecap Mutual Fund</div>
             </div>
             <div className='text-center'>
               <div className='font-medium text-purple-600'>
-                {directStocksAlloc}%
+                ${directStocksAmount.toLocaleString()}
               </div>
               <div className='text-gray-600'>Direct Stocks</div>
             </div>
             <div className='text-center'>
               <div className='font-medium text-orange-600'>
-                {smallCapAlloc}%
+                ${smallCapAmount.toLocaleString()}
               </div>
-              <div className='text-gray-600'>Small Cap</div>
+              <div className='text-gray-600'>Smallcap Mutual Fund</div>
             </div>
-          </div>
-        </div>
-
-        {/* Financial Goals */}
-        <div className='card p-4'>
-          <h4 className='font-medium text-gray-700 mb-3'>Financial Goals</h4>
-          <div className='grid grid-cols-1 md:grid-cols-3 gap-4 text-sm'>
-            {Object.entries(goals).map(([key, value]) => (
-              <div key={key} className='flex justify-between'>
-                <span className='capitalize'>
-                  {key.replace(/([A-Z])/g, ' $1')}:
-                </span>
-                <span className='font-medium'>
-                  ${(Number(value) || 0).toLocaleString()}
-                </span>
-              </div>
-            ))}
           </div>
         </div>
       </div>
@@ -370,6 +423,15 @@ const CalculatorPage: React.FC = () => {
         <h2 className='text-2xl font-bold text-gray-800 mb-6'>
           Financial Planning Calculator
         </h2>
+
+        {dataLoading && (
+          <div className='mb-4 p-3 bg-blue-50 border border-blue-200 rounded-md'>
+            <div className='flex items-center text-blue-700'>
+              <div className='animate-spin rounded-full h-4 w-4 border-b-2 border-blue-700 mr-2'></div>
+              Loading your financial plan data...
+            </div>
+          </div>
+        )}
 
         <div className='flex flex-wrap gap-2 mb-6'>
           {tabs.map((tab) => (

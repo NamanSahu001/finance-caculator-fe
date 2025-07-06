@@ -88,27 +88,29 @@ const Chart: React.FC<ChartProps> = ({ data }) => {
           <div className='grid grid-cols-2 md:grid-cols-4 gap-4'>
             <div className='text-center'>
               <div className='text-2xl font-bold text-blue-600'>
-                {data.analysis.investmentAllocation.fixedReturns}%
+                $
+                {data.analysis.investmentAllocation.fixedReturns.toLocaleString()}
               </div>
-              <div className='text-sm text-gray-600'>Fixed Returns</div>
+              <div className='text-sm text-gray-600'>Safe Assets</div>
             </div>
             <div className='text-center'>
               <div className='text-2xl font-bold text-green-600'>
-                {data.analysis.investmentAllocation.largeCap}%
+                ${data.analysis.investmentAllocation.largeCap.toLocaleString()}
               </div>
-              <div className='text-sm text-gray-600'>Large Cap</div>
+              <div className='text-sm text-gray-600'>Largecap Mutual Fund</div>
             </div>
             <div className='text-center'>
               <div className='text-2xl font-bold text-purple-600'>
-                {data.analysis.investmentAllocation.directStocks}%
+                $
+                {data.analysis.investmentAllocation.directStocks.toLocaleString()}
               </div>
               <div className='text-sm text-gray-600'>Direct Stocks</div>
             </div>
             <div className='text-center'>
               <div className='text-2xl font-bold text-orange-600'>
-                {data.analysis.investmentAllocation.smallCap}%
+                ${data.analysis.investmentAllocation.smallCap.toLocaleString()}
               </div>
-              <div className='text-sm text-gray-600'>Small Cap</div>
+              <div className='text-sm text-gray-600'>Smallcap Mutual Fund</div>
             </div>
           </div>
         </div>
@@ -160,7 +162,7 @@ const Chart: React.FC<ChartProps> = ({ data }) => {
               </thead>
               <tbody>
                 {data.yearlyProjections
-                  .slice(0, 10)
+                  .slice(0, 100)
                   .map((projection, index) => (
                     <tr key={index} className='border-b hover:bg-gray-50'>
                       <td className='py-2'>{projection.age}</td>

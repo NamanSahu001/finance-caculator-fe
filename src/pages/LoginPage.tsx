@@ -2,9 +2,9 @@ import React, { useState } from 'react'
 import { useAuth } from '../context/AuthContext'
 import { Link } from 'react-router-dom'
 
-const SignupPage: React.FC = () => {
-  const { register } = useAuth()
-  const [form, setForm] = useState({ name: '', email: '', password: '' })
+const LoginPage: React.FC = () => {
+  const { login } = useAuth()
+  const [form, setForm] = useState({ email: '', password: '' })
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
@@ -17,9 +17,9 @@ const SignupPage: React.FC = () => {
     setLoading(true)
     setError('')
     try {
-      await register(form.name, form.email, form.password)
+      await login(form.email, form.password)
     } catch (err: any) {
-      setError(err.message || 'Signup failed')
+      setError(err.message || 'Login failed')
     } finally {
       setLoading(false)
     }
@@ -28,19 +28,8 @@ const SignupPage: React.FC = () => {
   return (
     <div className='flex items-center justify-center min-h-screen bg-gray-50'>
       <div className='card w-full max-w-md p-8'>
-        <h2 className='text-2xl font-bold mb-6'>Sign Up</h2>
+        <h2 className='text-2xl font-bold mb-6'>Login</h2>
         <form onSubmit={handleSubmit} className='space-y-4'>
-          <div>
-            <label className='block mb-1'>Name</label>
-            <input
-              name='name'
-              type='text'
-              value={form.name}
-              onChange={handleChange}
-              className='input w-full'
-              required
-            />
-          </div>
           <div>
             <label className='block mb-1'>Email</label>
             <input
@@ -65,14 +54,14 @@ const SignupPage: React.FC = () => {
           </div>
           {error && <div className='text-red-500 text-sm'>{error}</div>}
           <button type='submit' className='btn w-full' disabled={loading}>
-            {loading ? 'Signing up...' : 'Sign Up'}
+            {loading ? 'Logging in...' : 'Login'}
           </button>
         </form>
         <div className='mt-4 text-center'>
           <p className='text-sm text-gray-600'>
-            Already have an account?{' '}
-            <Link to='/login' className='text-blue-600 hover:underline'>
-              Login
+            Don't have an account?{' '}
+            <Link to='/signup' className='text-blue-600 hover:underline'>
+              Sign up
             </Link>
           </p>
         </div>
@@ -81,4 +70,4 @@ const SignupPage: React.FC = () => {
   )
 }
 
-export default SignupPage
+export default LoginPage
