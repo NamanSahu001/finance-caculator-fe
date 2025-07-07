@@ -1,4 +1,6 @@
 import React from 'react'
+import jsPDF from 'jspdf'
+import autoTable from 'jspdf-autotable'
 
 interface PlanSummaryProps {
   plan: any
@@ -87,6 +89,45 @@ const PlanSummary: React.FC<PlanSummaryProps> = ({ plan, result }) => {
   const postRetirementMonthly =
     Number(personalInfo['Post-retirement monthly amount']) || 110000
 
+  // PDF download handler
+  const handleDownloadPDF = () => {
+    if (!result?.yearlyProjections || result.yearlyProjections.length === 0)
+      return
+    const doc = new jsPDF()
+    doc.setFontSize(16)
+    doc.text('Year-by-Year Projections', 14, 16)
+    const tableColumn = [
+      'Age',
+      'Starting Savings',
+      'Planned Expenses',
+      'Additional Expenses',
+      'Additional Savings',
+      'Ending Savings',
+      'Status',
+    ]
+    const tableRows = result.yearlyProjections.map((projection: any) => [
+      projection.age,
+      `$${projection.startingSavings.toLocaleString()}`,
+      `$${projection.plannedExpenses.toLocaleString()}`,
+      `$${projection.additionalExpenses.toLocaleString()}`,
+      `$${projection.additionalSavings.toLocaleString()}`,
+      `$${projection.endingSavings.toLocaleString()}`,
+      projection.status,
+    ])
+    autoTable(doc, {
+      head: [tableColumn],
+      body: tableRows,
+      startY: 22,
+      styles: { fontSize: 9 },
+      headStyles: { fillColor: [100, 116, 139] },
+      margin: { left: 8, right: 8 },
+      didDrawPage: (data) => {
+        doc.setFontSize(10)
+      },
+    })
+    doc.save('yearly-projections.pdf')
+  }
+
   return (
     <div className='space-y-6'>
       <h3 className='text-xl font-bold text-gray-800 mb-6'>
@@ -171,9 +212,17 @@ const PlanSummary: React.FC<PlanSummaryProps> = ({ plan, result }) => {
       {/* Year-by-Year Projections */}
       {result?.yearlyProjections && result.yearlyProjections.length > 0 && (
         <div className='card p-4'>
-          <h4 className='font-semibold text-gray-700 mb-3'>
-            Year-by-Year Projections
-          </h4>
+          <div className='flex justify-between items-center mb-3'>
+            <h4 className='font-semibold text-gray-700'>
+              Year-by-Year Projections
+            </h4>
+            <button
+              onClick={handleDownloadPDF}
+              className='bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-sm shadow'
+            >
+              Download PDF
+            </button>
+          </div>
           <div className='overflow-x-auto'>
             <table className='w-full text-sm'>
               <thead>
