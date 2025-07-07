@@ -24,13 +24,13 @@ export async function register(name: string, email: string, password: string) {
       password,
     })
 
-    // The backend returns user data on successful registration
+
     const { user, token } = response.data
     return {
       id: user.id,
       name: user.username,
       email: user.email,
-      type: user.type || 1, // Default to simple user if type not provided
+      type: user.type || 1, 
       token,
     }
   } catch (error: any) {
@@ -44,7 +44,7 @@ export async function register(name: string, email: string, password: string) {
 export async function login(email: string, password: string) {
   try {
     const response = await api.post('/auth/login', {
-      username: email, // Backend expects 'username' field
+      username: email, 
       password,
     })
     console.log(response.data)
@@ -53,7 +53,7 @@ export async function login(email: string, password: string) {
       id: user.id,
       name: user.username,
       email: user.email,
-      type: user.type || 1, // Default to simple user if type not provided
+      type: user.type || 1, 
       token,
     }
   } catch (error: any) {
@@ -438,14 +438,14 @@ export async function getPlanData(user: any) {
   } catch (error) {
     console.error('Error fetching plan data:', error)
 
-    const savedPlans = JSON.parse(localStorage.getItem('savedPlans') || '[]')
-    if (savedPlans.length > 0) {
-      console.log(
-        'Using fallback data from localStorage:',
-        savedPlans[savedPlans.length - 1]
-      )
-      return savedPlans[savedPlans.length - 1]
-    }
+    // const savedPlans = JSON.parse(localStorage.getItem('savedPlans') || '[]')
+    // if (savedPlans.length > 0) {
+    //   console.log(
+    //     'Using fallback data from localStorage:',
+    //     savedPlans[savedPlans.length - 1]
+    //   )
+    //   return savedPlans[savedPlans.length - 1]
+    // }
 
     return {
       personalinfo: {},
