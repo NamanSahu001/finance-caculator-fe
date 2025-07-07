@@ -8,86 +8,61 @@ interface PlanSummaryProps {
 }
 
 const PlanSummary: React.FC<PlanSummaryProps> = ({ plan, result }) => {
-  const personalInfo = plan.personalinfo || {}
   const investmentStrategy = plan.investmentstrategy || {}
 
-  const currentSavings = Number(personalInfo['Current Savings']) || 0
-  const currentMonthlyInvestment =
-    Number(investmentStrategy['Current Monthly Investment']) || 0
-
-  // Calculate investment approach returns
   const vpfAmount = Number(investmentStrategy['VPF/EPF/PPF Amount']) || 0
-  const rdAmount =
-    Number(investmentStrategy['Recurring Deposit/Fixed Dep Amount']) || 0
-  const govBillsAmount =
-    Number(investmentStrategy['Government Bills Amount']) || 0
+  const rdAmount = Number(investmentStrategy['Recurring Deposit/Fixed Dep Amount']) || 0
+  const govBillsAmount = Number(investmentStrategy['Government Bills Amount']) || 0
   const goldAmount = Number(investmentStrategy['Gold Amount']) || 0
-  const corporateBondsAmount =
-    Number(investmentStrategy['Corporate Bonds Amount']) || 0
-  const largeCapAmount =
-    Number(investmentStrategy['Largecap Mutual Fund Amount']) || 0
-  const directStocksAmount =
-    Number(investmentStrategy['Direct Stocks Amount']) || 0
-  const smallCapAmount =
-    Number(investmentStrategy['Smallcap Mutual Fund Amount']) || 0
+  const corporateBondsAmount = Number(investmentStrategy['Corporate Bonds Amount']) || 0
+  const largeCapAmount = Number(investmentStrategy['Largecap Mutual Fund Amount']) || 0
+  const directStocksAmount = Number(investmentStrategy['Direct Stocks Amount']) || 0
+  const smallCapAmount = Number(investmentStrategy['Smallcap Mutual Fund Amount']) || 0
 
-  const totalInvestment =
-    vpfAmount +
-    rdAmount +
-    govBillsAmount +
-    goldAmount +
-    corporateBondsAmount +
-    largeCapAmount +
-    directStocksAmount +
-    smallCapAmount
+  const investments = [
+    {
+      label: 'VPF/EPF/PPF',
+      amount: vpfAmount,
+      irr: Number(investmentStrategy['VPF/EPF/PPF IRR']) || 0,
+    },
+    {
+      label: 'Recurring Deposit/Fixed Dep',
+      amount: rdAmount,
+      irr: Number(investmentStrategy['Recurring Deposit/Fixed Dep IRR']) || 0,
+    },
+    {
+      label: 'Government Bills',
+      amount: govBillsAmount,
+      irr: Number(investmentStrategy['Government Bills IRR']) || 0,
+    },
+    {
+      label: 'Gold',
+      amount: goldAmount,
+      irr: Number(investmentStrategy['Gold IRR']) || 0,
+    },
+    {
+      label: 'Corporate Bonds',
+      amount: corporateBondsAmount,
+      irr: Number(investmentStrategy['Corporate Bonds IRR']) || 0,
+    },
+    {
+      label: 'Largecap Mutual Fund',
+      amount: largeCapAmount,
+      irr: Number(investmentStrategy['Largecap Mutual Fund IRR']) || 0,
+    },
+    {
+      label: 'Direct Stocks',
+      amount: directStocksAmount,
+      irr: Number(investmentStrategy['Direct Stocks IRR']) || 0,
+    },
+    {
+      label: 'Smallcap Mutual Fund',
+      amount: smallCapAmount,
+      irr: Number(investmentStrategy['Smallcap Mutual Fund IRR']) || 0,
+    },
+  ]
+  const totalInvestment = investments.reduce((sum, inv) => sum + inv.amount, 0)
 
-  // Calculate weighted returns and tax rates
-  const weightedReturns =
-    totalInvestment > 0
-      ? (vpfAmount * 7 +
-          rdAmount * 7 +
-          govBillsAmount * 7 +
-          goldAmount * 7 +
-          corporateBondsAmount * 7 +
-          largeCapAmount * 12 +
-          directStocksAmount * 15 +
-          smallCapAmount * 18) /
-        totalInvestment
-      : 0
-
-  const weightedTaxRate =
-    totalInvestment > 0
-      ? ((vpfAmount +
-          rdAmount +
-          govBillsAmount +
-          goldAmount +
-          corporateBondsAmount) *
-          30 +
-          (largeCapAmount + directStocksAmount + smallCapAmount) * 20) /
-        totalInvestment
-      : 0
-
-  // Calculate shares
-  const fixedReturnsShare =
-    totalInvestment > 0
-      ? ((vpfAmount +
-          rdAmount +
-          govBillsAmount +
-          goldAmount +
-          corporateBondsAmount) /
-          totalInvestment) *
-        100
-      : 0
-  const largeCapShare =
-    totalInvestment > 0 ? (largeCapAmount / totalInvestment) * 100 : 0
-  const directStocksShare =
-    totalInvestment > 0 ? (directStocksAmount / totalInvestment) * 100 : 0
-  const smallCapShare =
-    totalInvestment > 0 ? (smallCapAmount / totalInvestment) * 100 : 0
-
-  // Post-retirement monthly amount
-  const postRetirementMonthly =
-    Number(personalInfo['Post-retirement monthly amount']) || 110000
 
   // PDF download handler
   const handleDownloadPDF = () => {
@@ -144,65 +119,27 @@ const PlanSummary: React.FC<PlanSummaryProps> = ({ plan, result }) => {
             <thead>
               <tr className='border-b'>
                 <th className='text-left py-2'>Investment Type</th>
-                <th className='text-right py-2'>Returns</th>
-                <th className='text-right py-2'>Tax</th>
-                <th className='text-right py-2'>Share</th>
+                <th className='text-right py-2'>Amount</th>
+                <th className='text-right py-2'>IRR (%)</th>
+                <th className='text-right py-2'>Share (%)</th>
               </tr>
             </thead>
             <tbody>
-              <tr className='border-b'>
-                <td className='py-2'>Fixed Returns</td>
-                <td className='text-right py-2'>
-                  {weightedReturns.toFixed(1)}%
-                </td>
-                <td className='text-right py-2'>
-                  {weightedTaxRate.toFixed(1)}%
-                </td>
-                <td className='text-right py-2'>
-                  {fixedReturnsShare.toFixed(0)}%
-                </td>
-              </tr>
-              <tr className='border-b'>
-                <td className='py-2'>Large Cap Mutual Funds</td>
-                <td className='text-right py-2'>
-                  {weightedReturns.toFixed(1)}%
-                </td>
-                <td className='text-right py-2'>
-                  {weightedTaxRate.toFixed(1)}%
-                </td>
-                <td className='text-right py-2'>{largeCapShare.toFixed(0)}%</td>
-              </tr>
-              <tr className='border-b'>
-                <td className='py-2'>Direct Stocks</td>
-                <td className='text-right py-2'>
-                  {weightedReturns.toFixed(1)}%
-                </td>
-                <td className='text-right py-2'>
-                  {weightedTaxRate.toFixed(1)}%
-                </td>
-                <td className='text-right py-2'>
-                  {directStocksShare.toFixed(0)}%
-                </td>
-              </tr>
-              <tr className='border-b'>
-                <td className='py-2'>Smallcap Mutual Funds</td>
-                <td className='text-right py-2'>
-                  {weightedReturns.toFixed(1)}%
-                </td>
-                <td className='text-right py-2'>
-                  {weightedTaxRate.toFixed(1)}%
-                </td>
-                <td className='text-right py-2'>{smallCapShare.toFixed(0)}%</td>
-              </tr>
+              {investments.map((inv) => (
+                <tr key={inv.label}>
+                  <td className='py-2'>{inv.label}</td>
+                  <td className='text-right py-2'>₹{inv.amount.toLocaleString()}</td>
+                  <td className='text-right py-2'>{inv.irr}</td>
+                  <td className='text-right py-2'>
+                    {totalInvestment > 0 ? ((inv.amount / totalInvestment) * 100).toFixed(1) : '0'}
+                  </td>
+                </tr>
+              ))}
               <tr className='bg-gray-50 font-semibold'>
                 <td className='py-2'>Total</td>
-                <td className='text-right py-2'>
-                  {weightedReturns.toFixed(1)}%
-                </td>
-                <td className='text-right py-2'>
-                  {weightedTaxRate.toFixed(1)}%
-                </td>
-                <td className='text-right py-2'>100%</td>
+                <td className='text-right py-2'>₹{totalInvestment.toLocaleString()}</td>
+                <td className='text-right py-2'></td>
+                <td className='text-right py-2'>100</td>
               </tr>
             </tbody>
           </table>
@@ -243,19 +180,19 @@ const PlanSummary: React.FC<PlanSummaryProps> = ({ plan, result }) => {
                     <tr key={index} className='border-b hover:bg-gray-50'>
                       <td className='py-2'>{projection.age}</td>
                       <td className='text-right py-2'>
-                        ${projection.startingSavings.toLocaleString()}
+                        ₹{projection.startingSavings.toLocaleString()}
                       </td>
                       <td className='text-right py-2'>
-                        ${projection.plannedExpenses.toLocaleString()}
+                        ₹{projection.plannedExpenses.toLocaleString()}
                       </td>
                       <td className='text-right py-2'>
-                        ${projection.additionalExpenses.toLocaleString()}
+                        ₹{projection.additionalExpenses.toLocaleString()}
                       </td>
                       <td className='text-right py-2'>
-                        ${projection.additionalSavings.toLocaleString()}
+                        ₹{projection.additionalSavings.toLocaleString()}
                       </td>
                       <td className='text-right py-2 font-medium'>
-                        ${projection.endingSavings.toLocaleString()}
+                        ₹{projection.endingSavings.toLocaleString()}
                       </td>
                       <td className='text-center py-2'>
                         <span

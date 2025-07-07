@@ -12,7 +12,6 @@ const tabs = [
   'Summary',
 ]
 
-// Predefined fields based on financial planning structure
 const fieldDefinitions = {
   'Personal Info': {
     'Current Age': { type: 'number', placeholder: 'Enter your current age' },
@@ -20,41 +19,33 @@ const fieldDefinitions = {
     'Wish to live till': {
       type: 'number',
       placeholder: 'Expected life expectancy',
-      defaultValue: 85,
     },
     'Current Savings': { type: 'number', placeholder: 'Current total savings' },
     Inflation: {
       type: 'number',
       placeholder: 'Expected inflation rate %',
-      defaultValue: 6,
     },
     'Capital Gain Tax': {
       type: 'number',
       placeholder: 'Capital gains tax rate %',
-      defaultValue: 20,
     },
     'Income Tax': {
       type: 'number',
       placeholder: 'Income tax rate %',
-      defaultValue: 30,
     },
   },
   Income: {
     Salary: { type: 'number', placeholder: 'Monthly salary' },
     Bonus: { type: 'number', placeholder: 'Monthly bonus' },
     'Investment Income': {
-      type: 'number',
-      placeholder: 'Monthly investment income',
-    },
+      type: 'number', placeholder: 'Monthly investment income' },
     'Rental Income': { type: 'number', placeholder: 'Monthly rental income' },
     'Other Income': { type: 'number', placeholder: 'Other monthly income' },
   },
   Expenses: {
     Housing: { type: 'number', placeholder: 'Monthly housing costs' },
     Transportation: {
-      type: 'number',
-      placeholder: 'Monthly transportation costs',
-    },
+      type: 'number', placeholder: 'Monthly transportation costs' },
     Food: { type: 'number', placeholder: 'Monthly food expenses' },
     Utilities: { type: 'number', placeholder: 'Monthly utilities' },
     Insurance: { type: 'number', placeholder: 'Monthly insurance premiums' },
@@ -63,98 +54,38 @@ const fieldDefinitions = {
     'Debt Payments': { type: 'number', placeholder: 'Monthly debt payments' },
   },
   'Investment Strategy': {
-    // Safe Asset Investments
     'VPF/EPF/PPF Amount': {
-      type: 'number',
-      placeholder: 'VPF/EPF/PPF amount',
-      defaultValue: 0,
-    },
+      type: 'number', placeholder: 'VPF/EPF/PPF amount' },
     'VPF/EPF/PPF IRR': {
-      type: 'number',
-      placeholder: 'VPF/EPF/PPF IRR %',
-      defaultValue: 7,
-    },
+      type: 'number', placeholder: 'VPF/EPF/PPF IRR %' },
     'Recurring Deposit/Fixed Dep Amount': {
-      type: 'number',
-      placeholder: 'Recurring Deposit amount',
-      defaultValue: 0,
-    },
+      type: 'number', placeholder: 'Recurring Deposit amount' },
     'Recurring Deposit/Fixed Dep IRR': {
-      type: 'number',
-      placeholder: 'Recurring Deposit IRR %',
-      defaultValue: 7,
-    },
+      type: 'number', placeholder: 'Recurring Deposit IRR %' },
     'Government Bills Amount': {
-      type: 'number',
-      placeholder: 'Government Bills amount',
-      defaultValue: 0,
-    },
+      type: 'number', placeholder: 'Government Bills amount' },
     'Government Bills IRR': {
-      type: 'number',
-      placeholder: 'Government Bills IRR %',
-      defaultValue: 7,
-    },
+      type: 'number', placeholder: 'Government Bills IRR %' },
     'Gold Amount': {
-      type: 'number',
-      placeholder: 'Gold amount',
-      defaultValue: 0,
-    },
-    'Gold IRR': { type: 'number', placeholder: 'Gold IRR %', defaultValue: 7 },
+      type: 'number', placeholder: 'Gold amount' },
+    'Gold IRR': { type: 'number', placeholder: 'Gold IRR %' },
     'Corporate Bonds Amount': {
-      type: 'number',
-      placeholder: 'Corporate Bonds amount',
-      defaultValue: 20,
-    },
+      type: 'number', placeholder: 'Corporate Bonds amount' },
     'Corporate Bonds IRR': {
-      type: 'number',
-      placeholder: 'Corporate Bonds IRR %',
-      defaultValue: 7,
-    },
-    // Stock Market Investments
+      type: 'number', placeholder: 'Corporate Bonds IRR %' },
     'Largecap Mutual Fund Amount': {
-      type: 'number',
-      placeholder: 'Largecap Mutual Fund amount',
-      defaultValue: 0,
-    },
+      type: 'number', placeholder: 'Largecap Mutual Fund amount' },
     'Largecap Mutual Fund IRR': {
-      type: 'number',
-      placeholder: 'Largecap Mutual Fund IRR %',
-      defaultValue: 12,
-    },
+      type: 'number', placeholder: 'Largecap Mutual Fund IRR %' },
     'Direct Stocks Amount': {
-      type: 'number',
-      placeholder: 'Direct Stocks amount',
-      defaultValue: 220,
-    },
+      type: 'number', placeholder: 'Direct Stocks amount' },
     'Direct Stocks IRR': {
-      type: 'number',
-      placeholder: 'Direct Stocks IRR %',
-      defaultValue: 10,
-    },
+      type: 'number', placeholder: 'Direct Stocks IRR %' },
     'Smallcap Mutual Fund Amount': {
-      type: 'number',
-      placeholder: 'Smallcap Mutual Fund amount',
-      defaultValue: 10,
-    },
+      type: 'number', placeholder: 'Smallcap Mutual Fund amount' },
     'Smallcap Mutual Fund IRR': {
-      type: 'number',
-      placeholder: 'Smallcap Mutual Fund IRR %',
-      defaultValue: 18,
-    },
+      type: 'number', placeholder: 'Smallcap Mutual Fund IRR %' },
   },
-}
-
-// Investment approach definitions
-const investmentApproaches = {
-  'Fixed Returns': { returns: 7, tax: 30 },
-  'Large Cap Mutual Funds': { returns: 12, tax: 20 },
-  'Direct Stocks': { returns: 15, tax: 20 },
-  'Small Cap Mutual Funds': { returns: 18, tax: 20 },
-}
-
-const postRetirementApproaches = {
-  'Fixed Returns': { returns: 7, tax: 30 },
-  'Large Cap Mutual Funds': { returns: 12, tax: 20 },
 }
 
 const CalculatorPage: React.FC = () => {
@@ -165,17 +96,12 @@ const CalculatorPage: React.FC = () => {
   const [loading, setLoading] = useState(false)
   const [dataLoading, setDataLoading] = useState(true)
 
-  // Load plan data on component mount
   useEffect(() => {
     const loadPlanData = async () => {
       if (!user) return
-
       try {
         setDataLoading(true)
-        const planData = await getPlanData(user) // Fetch plan with user object
-        console.log('Loaded plan data:', planData)
-
-        // Update the plan context with fetched data
+        const planData:any = await getPlanData(user)
         setPlan(planData)
       } catch (error) {
         console.error('Error loading plan data:', error)
@@ -183,7 +109,6 @@ const CalculatorPage: React.FC = () => {
         setDataLoading(false)
       }
     }
-
     loadPlanData()
   }, [setPlan, user])
 
@@ -199,24 +124,22 @@ const CalculatorPage: React.FC = () => {
 
   const handleCalculate = async () => {
     if (!user) return
-
     setLoading(true)
     const summary = await getPlanSummary(plan, user)
     setResult(summary)
     setLoading(false)
+    setActiveTab('Summary')
   }
 
   const renderSection = () => {
     if (activeTab === 'Summary') {
       return renderSummary()
     }
-
     const sectionKey = activeTab
       .toLowerCase()
       .replace(' ', '') as keyof typeof plan
     const section = plan[sectionKey] || {}
     const fields = fieldDefinitions[activeTab as keyof typeof fieldDefinitions]
-
     return (
       <div className='space-y-4'>
         <h3 className='text-lg font-semibold text-gray-800'>{activeTab}</h3>
@@ -248,7 +171,6 @@ const CalculatorPage: React.FC = () => {
         <h2 className='text-2xl font-bold text-gray-800 mb-6'>
           Financial Planning Calculator
         </h2>
-
         {dataLoading && (
           <div className='mb-4 p-3 bg-blue-50 border border-blue-200 rounded-md'>
             <div className='flex items-center text-blue-700'>
@@ -257,7 +179,6 @@ const CalculatorPage: React.FC = () => {
             </div>
           </div>
         )}
-
         <div className='flex flex-wrap gap-2 mb-6'>
           {tabs.map((tab) => (
             <button
@@ -273,9 +194,7 @@ const CalculatorPage: React.FC = () => {
             </button>
           ))}
         </div>
-
         {renderSection()}
-
         {activeTab !== 'Summary' && (
           <button
             className='btn mt-6 w-full'
