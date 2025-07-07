@@ -128,6 +128,7 @@ const CalculatorPage: React.FC = () => {
     const summary = await getPlanSummary(plan, user)
     setResult(summary)
     setLoading(false)
+    setActiveTab('Summary')
   }
 
   const renderSection = () => {

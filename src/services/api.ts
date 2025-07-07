@@ -74,22 +74,6 @@ export async function logout() {
   }
 }
 
-async function savePlanData(planData: any) {
-  await new Promise((resolve) => setTimeout(resolve, 500))
-
-  const savedPlans = JSON.parse(localStorage.getItem('savedPlans') || '[]')
-  const newPlan = {
-    id: Date.now(),
-    timestamp: new Date().toISOString(),
-    ...planData,
-  }
-  savedPlans.push(newPlan)
-  localStorage.setItem('savedPlans', JSON.stringify(savedPlans))
-
-  console.log('Plan data saved to localStorage:', newPlan)
-  return { success: true, data: newPlan }
-}
-
 export async function getPlanSummary(plan: any, user: any) {
   const personalInfo = plan.personalinfo || {}
   const income = plan.income || {}
@@ -169,11 +153,6 @@ export async function getPlanSummary(plan: any, user: any) {
   const postRetirementReturns =
     (postRetirementSafeAssets * 7 + postRetirementLargeCap * 12) / 100
 
-  const postRetirementTax =
-    (postRetirementSafeAssets * incomeTax +
-      postRetirementLargeCap * capitalGainTax) /
-    100
-
   const age = Number(personalInfo['Current Age']) || 30
   const retirementAge = Number(personalInfo['Retirement Age']) || 65
   const lifeExpectancy = Number(personalInfo['Wish to live till']) || 85
@@ -183,15 +162,7 @@ export async function getPlanSummary(plan: any, user: any) {
   const yearsToRetirement = retirementAge - age
   const yearsInRetirement = lifeExpectancy - retirementAge
 
-  const yearlyProjections: Array<{
-    age: number
-    startingSavings: number
-    plannedExpenses: number
-    additionalExpenses: number
-    additionalSavings: number
-    endingSavings: number
-    status: string
-  }> = []
+  const yearlyProjections: Array<any> = []
   let currentYearSavings = currentSavings
   let currentYearInvestment = currentMonthlyInvestment * 12
 
@@ -235,8 +206,6 @@ export async function getPlanSummary(plan: any, user: any) {
 
   const monthlyExpensesInRetirement =
     totalExpenses * Math.pow(1 + inflationRate / 100, yearsToRetirement)
-  const postRetirementAnnualReturn =
-    postRetirementReturns * (1 - postRetirementTax / 100)
   const retirementCorpusNeeded =
     monthlyExpensesInRetirement * 12 * yearsInRetirement
 
@@ -297,7 +266,7 @@ export async function getPlanSummary(plan: any, user: any) {
 
     try {
       console.log('Attempting to save using mock function...')
-      await savePlanData(planData)
+      // await savePlanData(planData)
       saveSuccess = true
       console.log('Plan data saved using mock function')
     } catch (mockError) {
@@ -341,6 +310,7 @@ export async function getPlanSummary(plan: any, user: any) {
       },
     },
     yearlyProjections,
+    plannedExpenses: totalExpenses * 12,
   }
 }
 
