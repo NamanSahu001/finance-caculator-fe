@@ -11,13 +11,19 @@ const PlanSummary: React.FC<PlanSummaryProps> = ({ plan, result }) => {
   const investmentStrategy = plan.investmentstrategy || {}
 
   const vpfAmount = Number(investmentStrategy['VPF/EPF/PPF Amount']) || 0
-  const rdAmount = Number(investmentStrategy['Recurring Deposit/Fixed Dep Amount']) || 0
-  const govBillsAmount = Number(investmentStrategy['Government Bills Amount']) || 0
+  const rdAmount =
+    Number(investmentStrategy['Recurring Deposit/Fixed Dep Amount']) || 0
+  const govBillsAmount =
+    Number(investmentStrategy['Government Bills Amount']) || 0
   const goldAmount = Number(investmentStrategy['Gold Amount']) || 0
-  const corporateBondsAmount = Number(investmentStrategy['Corporate Bonds Amount']) || 0
-  const largeCapAmount = Number(investmentStrategy['Largecap Mutual Fund Amount']) || 0
-  const directStocksAmount = Number(investmentStrategy['Direct Stocks Amount']) || 0
-  const smallCapAmount = Number(investmentStrategy['Smallcap Mutual Fund Amount']) || 0
+  const corporateBondsAmount =
+    Number(investmentStrategy['Corporate Bonds Amount']) || 0
+  const largeCapAmount =
+    Number(investmentStrategy['Largecap Mutual Fund Amount']) || 0
+  const directStocksAmount =
+    Number(investmentStrategy['Direct Stocks Amount']) || 0
+  const smallCapAmount =
+    Number(investmentStrategy['Smallcap Mutual Fund Amount']) || 0
 
   const investments = [
     {
@@ -63,7 +69,6 @@ const PlanSummary: React.FC<PlanSummaryProps> = ({ plan, result }) => {
   ]
   const totalInvestment = investments.reduce((sum, inv) => sum + inv.amount, 0)
 
-
   // PDF download handler
   const handleDownloadPDF = () => {
     if (!result?.yearlyProjections || result.yearlyProjections.length === 0)
@@ -82,11 +87,11 @@ const PlanSummary: React.FC<PlanSummaryProps> = ({ plan, result }) => {
     ]
     const tableRows = result.yearlyProjections.map((projection: any) => [
       projection.age,
-      `$${projection.startingSavings.toLocaleString()}`,
-      `$${projection.plannedExpenses.toLocaleString()}`,
-      `$${projection.additionalExpenses.toLocaleString()}`,
-      `$${projection.additionalSavings.toLocaleString()}`,
-      `$${projection.endingSavings.toLocaleString()}`,
+      `rs${projection.startingSavings.toLocaleString()}`,
+      `rs${projection.plannedExpenses.toLocaleString()}`,
+      `rs${projection.additionalExpenses.toLocaleString()}`,
+      `rs${projection.additionalSavings.toLocaleString()}`,
+      `rs${projection.endingSavings.toLocaleString()}`,
       projection.status,
     ])
     autoTable(doc, {
@@ -128,16 +133,22 @@ const PlanSummary: React.FC<PlanSummaryProps> = ({ plan, result }) => {
               {investments.map((inv) => (
                 <tr key={inv.label}>
                   <td className='py-2'>{inv.label}</td>
-                  <td className='text-right py-2'>₹{inv.amount.toLocaleString()}</td>
+                  <td className='text-right py-2'>
+                    ₹{inv.amount.toLocaleString()}
+                  </td>
                   <td className='text-right py-2'>{inv.irr}</td>
                   <td className='text-right py-2'>
-                    {totalInvestment > 0 ? ((inv.amount / totalInvestment) * 100).toFixed(1) : '0'}
+                    {totalInvestment > 0
+                      ? ((inv.amount / totalInvestment) * 100).toFixed(1)
+                      : '0'}
                   </td>
                 </tr>
               ))}
               <tr className='bg-gray-50 font-semibold'>
                 <td className='py-2'>Total</td>
-                <td className='text-right py-2'>₹{totalInvestment.toLocaleString()}</td>
+                <td className='text-right py-2'>
+                  ₹{totalInvestment.toLocaleString()}
+                </td>
                 <td className='text-right py-2'></td>
                 <td className='text-right py-2'>100</td>
               </tr>
